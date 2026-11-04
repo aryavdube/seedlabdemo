@@ -12,9 +12,16 @@
    • To add a publication: copy one object in PUBLICATIONS.
      - Bold the lab members by wrapping them in **double asterisks**.
    • To add news: copy one object in NEWS.
+   • Links (doi, pdf, code, href, links.*): use full https:// URLs or site
+     paths. Leave '' (or '#') while unknown — empty links are hidden.
+   • email: only real, consented addresses. Leave '' for sample people.
    ========================================================================== */
 
 window.SEED = window.SEED || {};
+
+// Shows a "preview / placeholder content" notice on every page.
+// Set to false once the sample people, papers, news and studies are replaced.
+window.SEED.PREVIEW = true;
 
 window.SEED.TEAM = [
   {
@@ -28,12 +35,12 @@ window.SEED.TEAM = [
     education: 'Ph.D. — Institution (Year)',
     links: { profile: '#', scholar: '#', cv: '#' }
   },
-  { name: 'Group Member 1', role: 'Postdoctoral Scholar', group: 'postdoc', photo: '', email: 'member1@ucla.edu', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.', education: 'Ph.D. — Institution (Year)', links: { profile: '#' } },
-  { name: 'Group Member 2', role: 'Postdoctoral Scholar', group: 'postdoc', photo: '', email: 'member2@ucla.edu', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum.', education: 'Ph.D. — Institution (Year)', links: { profile: '#' } },
-  { name: 'Group Member 3', role: 'Graduate Student', group: 'grad', photo: '', email: 'member3@ucla.edu', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Aenean lacinia bibendum nulla sed consectetur. Maecenas faucibus mollis interdum.', education: 'B.A. — Institution (Year)', links: { profile: '#' } },
-  { name: 'Group Member 4', role: 'Graduate Student', group: 'grad', photo: '', email: 'member4@ucla.edu', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Nullam quis risus eget urna mollis ornare vel eu leo.', education: 'B.S. — Institution (Year)', links: { profile: '#' } },
-  { name: 'Group Member 5', role: 'Research Coordinator', group: 'staff', photo: '', email: 'member5@ucla.edu', focus: 'Study coordination & family outreach', bio: 'Short bio placeholder. Etiam porta sem malesuada magna mollis euismod.', education: 'B.A. — Institution (Year)', links: {} },
-  { name: 'Group Member 6', role: 'Data Scientist', group: 'staff', photo: '', email: 'member6@ucla.edu', focus: 'Computational methods', bio: 'Short bio placeholder. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.', education: 'M.S. — Institution (Year)', links: { github: '#' } },
+  { name: 'Group Member 1', role: 'Postdoctoral Scholar', group: 'postdoc', photo: '', email: '', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.', education: 'Ph.D. — Institution (Year)', links: { profile: '#' } },
+  { name: 'Group Member 2', role: 'Postdoctoral Scholar', group: 'postdoc', photo: '', email: '', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum.', education: 'Ph.D. — Institution (Year)', links: { profile: '#' } },
+  { name: 'Group Member 3', role: 'Graduate Student', group: 'grad', photo: '', email: '', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Aenean lacinia bibendum nulla sed consectetur. Maecenas faucibus mollis interdum.', education: 'B.A. — Institution (Year)', links: { profile: '#' } },
+  { name: 'Group Member 4', role: 'Graduate Student', group: 'grad', photo: '', email: '', focus: 'Research focus placeholder', bio: 'Short bio placeholder. Nullam quis risus eget urna mollis ornare vel eu leo.', education: 'B.S. — Institution (Year)', links: { profile: '#' } },
+  { name: 'Group Member 5', role: 'Research Coordinator', group: 'staff', photo: '', email: '', focus: 'Study coordination & family outreach', bio: 'Short bio placeholder. Etiam porta sem malesuada magna mollis euismod.', education: 'B.A. — Institution (Year)', links: {} },
+  { name: 'Group Member 6', role: 'Data Scientist', group: 'staff', photo: '', email: '', focus: 'Computational methods', bio: 'Short bio placeholder. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.', education: 'M.S. — Institution (Year)', links: { github: '#' } },
   { name: 'Group Member 7', role: 'Undergraduate Research Assistant', group: 'undergrad', photo: '', email: '', focus: 'Major · Class of 20XX', bio: 'Short bio placeholder. Sed posuere consectetur est at lobortis.', education: 'UCLA — Major (Expected 20XX)', links: {} },
   { name: 'Group Member 8', role: 'Undergraduate Research Assistant', group: 'undergrad', photo: '', email: '', focus: 'Major · Class of 20XX', bio: 'Short bio placeholder. Cum sociis natoque penatibus et magnis dis parturient montes.', education: 'UCLA — Major (Expected 20XX)', links: {} },
   { name: 'Group Member 9', role: 'Undergraduate Research Assistant', group: 'undergrad', photo: '', email: '', focus: 'Major · Class of 20XX', bio: 'Short bio placeholder. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.', education: 'UCLA — Major (Expected 20XX)', links: {} },

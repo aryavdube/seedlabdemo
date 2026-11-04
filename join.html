@@ -84,7 +84,8 @@
             <div class="field"><label for="f-topic">I am a…</label>
               <select id="f-topic" name="topic"><option>Family interested in a study</option><option>Prospective student or trainee</option><option>Researcher / collaborator</option><option>Member of the press</option><option>Other</option></select>
             </div>
-            <div class="field"><label for="f-msg">Message</label><textarea id="f-msg" name="message" required></textarea></div>
+            <div class="field"><label for="f-msg">Message</label><textarea id="f-msg" name="message" required aria-describedby="f-privacy"></textarea></div>
+            <p class="form-privacy" id="f-privacy">Please don't include medical details, diagnoses or other sensitive health information about you or your child. Regular email isn't a secure channel — a study team member will follow up to talk through anything private.</p>
             <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between">
               <p class="form-note">Opens your email app, addressed to the lab.</p>
               <button class="btn btn-ember" type="submit">Send message <span class="arr"><svg viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6.5 1.5 11 6l-4.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>

@@ -6,7 +6,7 @@
 (() => {
   'use strict';
 
-  const D = window.SEED || {};
+  const D = withSafeLinks(window.SEED || {});
   const html = document.documentElement;
   const page = document.body.dataset.page || 'home';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -367,6 +367,26 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const bold = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   const fmtDate = iso => { const d = new Date(iso + 'T12:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
+
+  /* Links from data.js: allow only relative, http(s) and mailto URLs, so a
+     typo like "javascript:…" can never become a clickable script. Placeholder
+     '#' links are dropped so unfinished entries don't render dead buttons. */
+  function safeHref(v) {
+    // Browsers ignore tabs/newlines inside URLs ("java\tscript:"), so strip them first
+    const s = String(v ?? '').replace(/[\u0000-\u001F\u007F]/g, '').trim();
+    if (!s || s === '#') return '';
+    const scheme = s.match(/^([a-z][a-z0-9+.-]*):/i);
+    return !scheme || /^(https?|mailto)$/i.test(scheme[1]) ? s : '';
+  }
+  function withSafeLinks(src) {
+    const cleanLinks = links => Object.fromEntries(Object.entries(links || {}).map(([k, v]) => [k, safeHref(v)]).filter(([, v]) => v));
+    return {
+      ...src,
+      TEAM: src.TEAM && src.TEAM.map(m => ({ ...m, links: cleanLinks(m.links) })),
+      PUBLICATIONS: src.PUBLICATIONS && src.PUBLICATIONS.map(p => ({ ...p, pdf: safeHref(p.pdf), doi: safeHref(p.doi), code: safeHref(p.code) })),
+      NEWS: src.NEWS && src.NEWS.map(n => ({ ...n, href: safeHref(n.href) || '#' }))
+    };
+  }
 
   function splitWords(el) {
     const walk = node => {
@@ -757,10 +777,23 @@
       .to(L, { clipPath: 'inset(0 0 100% 0)', duration: 1, ease: 'expo.inOut', onStart: () => setTimeout(startIntro, 250), onComplete: () => L.remove() }, '+=.15');
   }
 
+  /* Draft-content notice — shown while data.js sets SEED.PREVIEW = true, so
+     visitors don't mistake sample people, papers or studies for real ones. */
+  function renderPreviewNotice() {
+    if (!D.PREVIEW || state.get('previewDismissed')) return;
+    const n = document.createElement('aside');
+    n.className = 'preview-notice'; n.setAttribute('role', 'note'); n.setAttribute('aria-label', 'Preview notice');
+    n.innerHTML = `<p><b>Preview site.</b> Names, publications, news, studies and open positions shown here are placeholders, not real listings. For questions about the lab or research participation, email <a href="mailto:bwolff@mednet.ucla.edu">bwolff@mednet.ucla.edu</a>.</p>
+      <button class="icon-btn" type="button" aria-label="Dismiss preview notice">${CLOSE}</button>`;
+    $('button', n).addEventListener('click', () => { state.set('previewDismissed', true); n.remove(); });
+    document.body.appendChild(n);
+  }
+
   /* ------------------------------------------------------------------------
      Boot
      ------------------------------------------------------------------------ */
   renderChrome();
+  renderPreviewNotice();
   initTheme();
   renderPubPreview();
   renderNewsPreview();

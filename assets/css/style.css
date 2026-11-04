@@ -792,6 +792,13 @@ html.is-entering body::after { content: ''; position: fixed; inset: 0; z-index: 
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--ember); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ember) 18%, transparent); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .form-note { font-size: var(--text-xs); color: var(--fg-muted); }
+.form-privacy { font-size: var(--text-xs); color: var(--fg-muted); max-width: 60ch; }
+
+/* Preview notice (toggled by SEED.PREVIEW in data.js) */
+.preview-notice { position: fixed; left: 1rem; bottom: 1rem; z-index: 110; max-width: min(30rem, calc(100vw - 2rem)); display: flex; gap: .5rem; align-items: flex-start; padding: .85rem .5rem .85rem 1.1rem; border-radius: 16px; background: var(--ink); color: var(--bone); font-size: var(--text-xs); line-height: 1.5; border: 1px solid var(--line-dark); box-shadow: 0 10px 30px rgba(0, 0, 0, .25); }
+.preview-notice a { text-decoration: underline; text-underline-offset: 2px; }
+.preview-notice .icon-btn { flex: none; width: 32px; height: 32px; }
+.preview-notice .icon-btn svg { width: 12px; height: 12px; }
 .form-ok { display: none; padding: 1rem 1.25rem; border-radius: 14px; background: color-mix(in oklab, var(--sprout) 30%, transparent); font-size: var(--text-sm); }
 .form-ok.show { display: block; }
 @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } .contact-card { min-height: 380px; } .form-row { grid-template-columns: 1fr; } }
