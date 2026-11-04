@@ -11,13 +11,51 @@
   const page = document.body.dataset.page || 'home';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) html.classList.add('reduce');
-  const hasGSAP = typeof window.gsap !== 'undefined';
+  const hasGSAP = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+  if (!hasGSAP) html.classList.add('no-motion');
   // Tiny per-tab state that survives page navigation (no browser storage needed)
   const state = {
     read() { try { return JSON.parse(window.name || '{}') || {}; } catch (e) { return {}; } },
     set(k, v) { const o = this.read(); o[k] = v; try { window.name = JSON.stringify(o); } catch (e) {} },
     get(k) { return this.read()[k]; }
   };
+
+  // Keep modal focus and pointer interaction within the active overlay.
+  function modalFocus(root, controls = []) {
+    let previous = null, background = [];
+    const allowed = [root, ...controls];
+    const focusable = () => allowed.flatMap(el =>
+      [el, ...el.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')]
+        .filter(node => node.tabIndex >= 0 && !node.disabled && !node.closest('[inert]') && node.getClientRects().length)
+    );
+    const trap = e => {
+      if (e.key !== 'Tab') return;
+      const nodes = focusable(), i = nodes.indexOf(document.activeElement);
+      e.preventDefault();
+      nodes[(i + (e.shiftKey ? -1 : 1) + nodes.length) % nodes.length]?.focus();
+    };
+    const isolate = parent => Array.from(parent.children).forEach(el => {
+      if (allowed.includes(el)) return;
+      if (allowed.some(node => el.contains(node))) isolate(el);
+      else if (!el.inert) { el.inert = true; background.push(el); }
+    });
+    return {
+      open() {
+        previous = document.activeElement;
+        root.inert = false;
+        isolate(document.body);
+        document.addEventListener('keydown', trap);
+        focusable()[0]?.focus({ preventScroll: true });
+      },
+      close() {
+        document.removeEventListener('keydown', trap);
+        background.forEach(el => { el.inert = false; });
+        background = [];
+        previous?.focus({ preventScroll: true });
+        root.inert = true;
+      }
+    };
+  }
 
   /* ------------------------------------------------------------------------
      Icons + logo
@@ -82,15 +120,19 @@
           ${NAV.map((n, i) => `<a href="${n.href}" ${page === n.key ? 'aria-current="page"' : ''}><sup>0${i + 1}</sup>${n.label}</a>`).join('')}
         </nav>
         <div class="nav-actions">
-          <button class="icon-btn theme-btn" type="button" aria-label="Toggle dark mode">${html.dataset.theme === 'dark' ? SUN : MOON}</button>
+          <button class="icon-btn theme-btn" type="button" aria-label="Dark mode" aria-pressed="${html.dataset.theme === 'dark'}">${html.dataset.theme === 'dark' ? SUN : MOON}</button>
           <a class="btn btn-ink nav-cta" href="join.html#contact">Contact <span class="arr">${ARROW}</span></a>
-          <button class="icon-btn menu-btn" type="button" aria-label="Open menu" aria-expanded="false"><span class="bars"><span></span><span></span></span></button>
+          <button class="icon-btn menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"><span class="bars"><span></span><span></span></span></button>
         </div>
       </div>`;
     document.body.prepend(header);
 
     const mm = document.createElement('div');
     mm.className = 'mobile-menu';
+    mm.id = 'mobileMenu';
+    mm.inert = true;
+    mm.setAttribute('role', 'dialog');
+    mm.setAttribute('aria-label', 'Navigation menu');
     mm.setAttribute('aria-hidden', 'true');
     mm.innerHTML = `
       <ol>
@@ -152,6 +194,7 @@
       html.dataset.theme = next;
       state.set('theme', next);
       btn.innerHTML = next === 'dark' ? SUN : MOON;
+      btn.setAttribute('aria-pressed', String(next === 'dark'));
       window.dispatchEvent(new Event('seed-theme'));
     });
   }
@@ -163,13 +206,14 @@
     const header = document.querySelector('.site-header');
     const menuBtn = document.querySelector('.menu-btn');
     const mm = document.querySelector('.mobile-menu');
+    const focus = modalFocus(mm, [menuBtn]);
     let last = 0;
     const darkSecs = () => document.querySelectorAll('[data-header="dark"]');
 
     const update = () => {
       const y = getScroll();
       header.classList.toggle('is-scrolled', y > 30);
-      const goingDown = y > last && y > 400;
+      const goingDown = y > last && y > 400 && !header.contains(document.activeElement);
       if (!document.body.classList.contains('menu-open')) header.classList.toggle('is-hidden', goingDown);
       last = y;
       let onDark = false;
@@ -179,8 +223,10 @@
     update();
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('seed-scroll', update);
+    header.addEventListener('focusin', () => header.classList.remove('is-hidden'));
 
     const toggle = (open) => {
+      if (!open) focus.close();
       document.body.classList.toggle('menu-open', open);
       html.classList.toggle('menu-open', open);
       menuBtn.setAttribute('aria-expanded', String(open));
@@ -188,9 +234,16 @@
       mm.setAttribute('aria-hidden', String(!open));
       header.classList.remove('is-hidden');
       if (window.__lenis) open ? window.__lenis.stop() : window.__lenis.start();
+      if (open) focus.open();
     };
     menuBtn.addEventListener('click', () => toggle(!document.body.classList.contains('menu-open')));
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('menu-open')) toggle(false); });
+    window.matchMedia('(min-width: 1021px)').addEventListener('change', e => {
+      if (e.matches && document.body.classList.contains('menu-open')) {
+        toggle(false);
+        header.querySelector('.brand').focus({ preventScroll: true });
+      }
+    });
   }
 
   /* ------------------------------------------------------------------------
@@ -202,10 +255,10 @@
       if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
       if (a.target === '_blank' || a.hasAttribute('download')) return;
       const href = a.getAttribute('href') || '';
-      if (a.hasAttribute('data-top')) { e.preventDefault(); window.__lenis ? window.__lenis.scrollTo(0, { duration: 1.6 }) : window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      if (a.hasAttribute('data-top')) { e.preventDefault(); window.__lenis ? window.__lenis.scrollTo(0, { duration: 1.6 }) : window.scrollTo({ top: 0, behavior: reduce ? 'instant' : 'smooth' }); document.querySelector('.brand').focus({ preventScroll: true }); return; }
       if (!/\.html(#.*)?$/.test(href) || /^(https?:|mailto:|tel:)/.test(href)) return;
       const samePage = href.split('#')[0] === (location.pathname.split('/').pop() || 'index.html');
-      if (samePage && href.includes('#')) { e.preventDefault(); const t = document.querySelector('#' + href.split('#')[1]); if (t) window.__lenis ? window.__lenis.scrollTo(t, { offset: -90 }) : t.scrollIntoView({ behavior: 'smooth' }); return; }
+      if (samePage && href.includes('#')) return;
       if (reduce) return;
       e.preventDefault();
       state.set('nav', 1);
@@ -518,9 +571,8 @@
 
     // Drawer
     const dr = $('#drawer'); if (!dr) return;
-    let lastFocus = null;
+    const focus = modalFocus(dr);
     const open = (m, i) => {
-      lastFocus = document.activeElement;
       $('.drawer-media', dr).innerHTML = portrait(m, i);
       const dsvg = $('.drawer-media svg', dr); if (dsvg) dsvg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
       const L = m.links || {};
@@ -531,10 +583,11 @@
         <dl><dt>Focus</dt><dd>${esc(m.focus)}</dd><dt>Education</dt><dd>${esc(m.education)}</dd>${m.email ? `<dt>Email</dt><dd><a class="link-arrow" href="mailto:${esc(m.email)}">${esc(m.email)}</a></dd>` : ''}</dl>
         <div class="drawer-links">${Object.entries(L).map(([k, v]) => `<a class="res-link" href="${esc(v)}">${esc(k[0].toUpperCase() + k.slice(1))} ${ARROW_UR}</a>`).join('')}</div>`;
       dr.classList.add('open'); dr.setAttribute('aria-hidden', 'false');
+      html.classList.add('dialog-open');
       if (window.__lenis) window.__lenis.stop();
-      setTimeout(() => $('.drawer-close', dr).focus(), 50);
+      focus.open();
     };
-    const close = () => { dr.classList.remove('open'); dr.setAttribute('aria-hidden', 'true'); if (window.__lenis) window.__lenis.start(); if (lastFocus) lastFocus.focus(); };
+    const close = () => { focus.close(); dr.classList.remove('open'); dr.setAttribute('aria-hidden', 'true'); html.classList.remove('dialog-open'); if (window.__lenis) window.__lenis.start(); };
     grid.addEventListener('click', e => { const b = e.target.closest('.member'); if (!b) return; const idx = +b.dataset.i; open(D.TEAM[idx], others.indexOf(D.TEAM[idx])); });
     $('.drawer-close', dr).addEventListener('click', close);
     $('.drawer-scrim', dr).addEventListener('click', close);
@@ -581,7 +634,7 @@
     };
     $$('#pubFilters .chip').forEach(ch => ch.addEventListener('click', () => { type = ch.dataset.t; $$('#pubFilters .chip').forEach(c => c.setAttribute('aria-pressed', String(c === ch))); draw(); }));
     let tmr; $('#pubSearch').addEventListener('input', e => { clearTimeout(tmr); tmr = setTimeout(() => { q = e.target.value; draw(); }, 120); });
-    const clear = $('#pubClear'); if (clear) clear.addEventListener('click', () => { q = ''; $('#pubSearch').value = ''; type = 'All'; $$('#pubFilters .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.t === 'All'))); draw(); });
+    const clear = $('#pubClear'); if (clear) clear.addEventListener('click', () => { clearTimeout(tmr); q = ''; $('#pubSearch').value = ''; type = 'All'; $$('#pubFilters .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.t === 'All'))); draw(); $('#pubSearch').focus(); });
     draw();
   }
 
@@ -595,11 +648,21 @@
       };
       btns.forEach((b, i) => {
         b.addEventListener('click', () => sel(b));
-        b.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = btns[(i + (e.key === 'ArrowRight' ? 1 : -1) + btns.length) % btns.length]; n.focus(); sel(n); } });
+        b.addEventListener('keydown', e => {
+          let next;
+          if (e.key === 'Home') next = btns[0];
+          else if (e.key === 'End') next = btns[btns.length - 1];
+          else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') next = btns[(i + (e.key === 'ArrowRight' ? 1 : -1) + btns.length) % btns.length];
+          if (next) { e.preventDefault(); next.focus(); sel(next); }
+        });
       });
-      const hash = location.hash.replace('#', '');
-      const initial = btns.find(b => b.dataset.hash === hash) || btns[0];
-      requestAnimationFrame(() => sel(initial));
+      const syncHash = () => {
+        const initial = btns.find(b => b.dataset.hash === location.hash.slice(1));
+        sel(initial || btns.find(b => b.getAttribute('aria-selected') === 'true') || btns[0]);
+        if (initial) document.getElementById(initial.dataset.hash)?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      };
+      requestAnimationFrame(syncHash);
+      addEventListener('hashchange', syncHash);
       addEventListener('resize', () => move(btns.find(b => b.getAttribute('aria-selected') === 'true')));
       document.fonts && document.fonts.ready.then(() => move(btns.find(b => b.getAttribute('aria-selected') === 'true')));
     });

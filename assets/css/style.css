@@ -369,8 +369,8 @@ html.is-entering body::after { content: ''; position: fixed; inset: 0; z-index: 
 .acro-word .conj { font-style: italic; font-weight: 400; font-size: .32em; letter-spacing: 0; color: var(--fg-muted); margin-left: .35em; opacity: 0; }
 .acro-note { color: var(--fg-muted); font-size: var(--text-sm); line-height: 1.5; }
 .acro-note .mono { display: block; color: var(--fg); margin-bottom: .35rem; }
-.no-js .acro-word .rest, .reduce .acro-word .rest { clip-path: none; }
-.no-js .acro-word .conj, .reduce .acro-word .conj { opacity: 1; }
+.no-js .acro-word .rest, .reduce .acro-word .rest, .no-motion .acro-word .rest { clip-path: none; }
+.no-js .acro-word .conj, .reduce .acro-word .conj, .no-motion .acro-word .conj { opacity: 1; }
 @media (max-width: 760px) {
   .acro-row { grid-template-columns: 1fr; gap: .25rem; padding-block: 1rem; }
 }
@@ -587,9 +587,9 @@ html.is-entering body::after { content: ''; position: fixed; inset: 0; z-index: 
 
 /* Reveal helpers ------------------------------------------------------------ */
 .reveal-img { clip-path: inset(12% 12% 12% 12% round var(--radius-lg)); }
-.no-js .reveal-img, .reduce .reveal-img { clip-path: none; }
+.no-js .reveal-img, .reduce .reveal-img, .no-motion .reveal-img { clip-path: none; }
 .fade { opacity: 0; }
-.no-js .fade, .reduce .fade { opacity: 1; }
+.no-js .fade, .reduce .fade, .no-motion .fade { opacity: 1; }
 
 /* ==========================================================================
    Team page
@@ -653,6 +653,7 @@ html.is-entering body::after { content: ''; position: fixed; inset: 0; z-index: 
 .search { display: flex; align-items: center; gap: .6rem; padding: 0 1rem; height: 48px; border-radius: 999px; background: var(--bg-2); }
 .search svg { width: 16px; height: 16px; opacity: .6; flex: none; }
 .search input { border: 0; background: none; outline: none; width: 100%; font-size: var(--text-sm); }
+.search:focus-within { outline: 2px solid var(--ember); outline-offset: 3px; }
 .search input::placeholder { color: var(--fg-muted); }
 .toolbar .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 .toolbar .filters::-webkit-scrollbar { display: none; }
@@ -816,4 +817,6 @@ html.is-entering body::after { content: ''; position: fixed; inset: 0; z-index: 
   .hero-title { font-size: clamp(3.4rem, 15.5vw, 5rem); }
 }
 .link-arrow svg { width: 12px; height: 12px; flex: none; }
+.dialog-open { overflow: hidden; }
+main, [id='positions'], [id='participate'] { scroll-margin-top: 100px; }
 .pi-actions .link-arrow { white-space: nowrap; }

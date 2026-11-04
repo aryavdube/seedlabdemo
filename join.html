@@ -19,7 +19,7 @@
   <script>(function(){var h=document.documentElement;h.classList.remove('no-js');var s={};try{s=JSON.parse(window.name||'{}')||{};}catch(e){s={};}if(s.theme)h.dataset.theme=s.theme;var r=document.referrer,same=false;try{same=r&&new URL(r).host===location.host;}catch(e){}if(same&&s.nav)h.classList.add('is-entering');if(same)h.classList.add('no-loader');})();</script>
 </head>
 <body data-page="join">
-  <main id="main">
+  <main id="main" tabindex="-1">
     <section class="page-hero">
       <canvas class="ph-canvas" data-page-canvas aria-hidden="true"></canvas>
       <div class="wrap">
@@ -38,7 +38,7 @@
 
     <section class="section" style="padding-top:clamp(1rem,3vw,2rem)" id="participate">
       <div class="wrap">
-        <div class="tabpanel" id="panel-p" role="tabpanel" aria-labelledby="tab-p">
+        <div class="tabpanel" id="panel-p" role="tabpanel" aria-labelledby="tab-p" tabindex="0">
           <div class="sec-head"><div><span class="eyebrow">For families</span><h2 class="display h-2xl">Taking part, <em>step by step.</em></h2></div><p class="lede">Placeholder overview of who can take part, what's involved and how families are supported throughout.</p></div>
           <div class="steps">
             <div class="step fade"><span class="sn">01</span><div><h3>Reach out</h3><p>Contact our study team by email or the form below. Placeholder — describe the screening call.</p></div></div>
@@ -53,7 +53,7 @@
           </div>
         </div>
 
-        <div class="tabpanel" id="panel-j" role="tabpanel" aria-labelledby="tab-j" hidden>
+        <div class="tabpanel" id="panel-j" role="tabpanel" aria-labelledby="tab-j" tabindex="0" hidden>
           <div class="sec-head" id="positions"><div><span class="eyebrow">Positions</span><h2 class="display h-2xl">Train with <em>us.</em></h2></div><p class="lede">We welcome curious people from psychology, neuroscience, medicine, computer science, statistics and beyond.</p></div>
           <div class="positions">
             <div class="position"><div><h3>Undergraduate Research Assistant</h3><p>Placeholder — commitment, skills, how to apply.</p></div><span class="state mono"><i></i>Open</span><a class="btn btn-ghost" href="#contact">Apply <span class="arr"><svg viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6.5 1.5 11 6l-4.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></div>
